@@ -7,8 +7,7 @@ import (
 
 type Marker struct {
 	Id  bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
-	Lat string        `json:"lat"`
-	Lng string        `json:"lng"`
+	Coordinates []float64 `bson:"coordinates"`
 	Name string    `json:"name"`
 	Address string    `json:"address"`
 	Website string        `json:"website"`

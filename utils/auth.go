@@ -1,4 +1,4 @@
-package util
+package utils
 
 // This will handle all aspects of authenticating users in our system
 // For password managing/salting I used:
@@ -19,10 +19,10 @@ const (
 
 // This is returned when a new hash + salt combo is generated
 // no need for new struct
-/* type Password struct {
-	hash string
-	salt string
-} */
+// type Password struct {
+//	hash string
+//	salt string
+//}
 
 // this handles taking a raw user password and making in into something safe for
 // storing in our DB
@@ -36,7 +36,7 @@ func hashPassword(salted_pass string) string {
 }
 
 // Handles merging together the salt and the password
-func combine(salt string, raw_pass string) string {
+func Combine(salt string, raw_pass string) string {
 
 	// concat salt + password
 	pieces := []string{salt, raw_pass}
@@ -66,22 +66,10 @@ func generateSalt() string {
 func GenerateHashAndSalt(raw_pass string) (string, string) {
 	//password := new(Password)
 	//password.salt = generateSalt()
-	salt = generateSalt()
-	salted_pass := combine(salt, raw_pass)
+	salt := generateSalt()
+	salted_pass := Combine(salt, raw_pass)
 	//password.hash = hashPassword(salted_pass)
-	return salted_pass, salt
+	password_hash := hashPassword(salted_pass)
+	return password_hash, salt
 	//return password
-}
-
-// Checks whether or not the correct password has been provided
-func PasswordMatch(guess string, password *Password) bool {
-
-	salted_guess := combine(password.salt, guess)
-
-	// compare to the real deal
-	if bcrypt.CompareHashAndPassword([]byte(password.hash), []byte(salted_guess)) != nil {
-		return false
-	}
-
-	return true
 }
