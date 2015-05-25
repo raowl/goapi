@@ -2,6 +2,7 @@ package repos
 
 import (
 	"code.google.com/p/go.crypto/bcrypt"
+	"errors"
 	"goapi/utils"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -43,23 +44,23 @@ func (r *UserRepo) All() (UserCollection, error) {
 	return result, nil
 }
 
-func (r *UserRepo) Authenticate(user User) (bool, UserResource, error) {
+func (r *UserRepo) Authenticate(user User) (UserResource, error) {
 	// dry use next function
 	result := UserResource{}
 	err := r.Coll.Find(bson.M{"username": user.Username}).One(&result.Data)
 
 	if err != nil {
-		return false, UserResource{}, err
+		return UserResource{}, err
 	}
 
 	print(result.Data.Password)
 	print(user.Password)
 
 	if passwordMatch(user.Password, result) {
-		return true, result, nil
+		return result, nil
 	}
 
-	return false, UserResource{}, nil
+	return UserResource{}, errors.New("Passwd dont match")
 }
 
 func (r *UserRepo) Find(id string) (UserResource, error) {

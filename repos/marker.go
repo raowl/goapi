@@ -6,11 +6,11 @@ import (
 )
 
 type Marker struct {
-	Id  bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
-	Coordinates []float64 `bson:"coordinates"`
-	Name string    `json:"name"`
-	Address string    `json:"address"`
-	Website string        `json:"website"`
+	Id          bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
+	Coordinates [2]float64    `bson:"coordinates"`
+	Name        string        `json:"name"`
+	Address     string        `json:"address"`
+	Website     string        `json:"website"`
 }
 
 type MarkerCollection struct {

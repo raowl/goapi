@@ -1,0 +1,4 @@
+{
+    "PrivateKey": "config/demo.rsa",
+    "PublicKey": "config/demo.rsa.pub"
+}

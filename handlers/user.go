@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/context"
+	"goapi/config"
 	"goapi/repos"
+	"io/ioutil"
 	"net/http"
+	//"path/filepath"
 	"time"
 )
 
@@ -30,28 +33,37 @@ func (c *AppContext) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 //POST: /api/v1/user/login/ handler
 func (c *AppContext) AuthUserHandler(w http.ResponseWriter, r *http.Request) {
+	var (
+		privateKey []byte
+	)
 	body := context.Get(r, "body").(*repos.UserResource)
 	repo := repos.UserRepo{c.Db.C("users")}
-	status, user_resource, err := repo.Authenticate(body.Data)
+	user_resource, err := repo.Authenticate(body.Data)
 	if err != nil {
 		panic(err)
 	}
 	data := map[string]string{"token": ""}
 
-	if status {
-		// Create JWT token
-		token := jwt.New(jwt.GetSigningMethod("HS256"))
-		token.Claims["userid"] = user_resource.Data.Id
-		// Expire in 5 mins
-		token.Claims["exp"] = time.Now().Add(time.Minute * 5).Unix()
-		tokenString, err := token.SignedString([]byte("SecretKey12345"))
-		if err != nil {
-			panic(err)
-		}
+	// Create JWT token
+	token := jwt.New(jwt.GetSigningMethod("RS256"))
+	token.Claims["userid"] = user_resource.Data.Id
+	// Expire in 5 mins
+	token.Claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+	//token.Claims["exp"] = time.Now().Add(time.Minute * 1).Unix()
+	//cprivateKey, _ := filepath.Abs(config.Info.PrivateKey)
+	print("private key")
+	print(config.Info.PrivateKey)
+	privateKey, err = ioutil.ReadFile(config.Info.PrivateKey)
+	if err != nil {
+		panic(err)
+	}
+	tokenString, err := token.SignedString([]byte(privateKey))
+	if err != nil {
+		panic(err)
+	}
 
-		data = map[string]string{
-			"token": tokenString,
-		}
+	data = map[string]string{
+		"token": tokenString,
 	}
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 	json.NewEncoder(w).Encode(data)
