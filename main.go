@@ -9,7 +9,6 @@ import (
 	"net/http"
 )
 
-//TODO get this like tns-restful-json-api/v8 from a routes file with only the array option and routes
 func main() {
 	session, err := mgo.Dial("localhost")
 	if err != nil {

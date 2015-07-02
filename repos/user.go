@@ -20,6 +20,7 @@ type User struct {
 	Created  time.Time     `bson:"created" json:"created"`
 	Updated  time.Time     `bson:"updated" json:"updated"`
 	UrlToken string        `bson:"urltoken" json:"urltoken"`
+	//	UserMarker []Marker      `bson:"markers" json:"markers"`
 }
 
 type UserCollection struct {
