@@ -12,7 +12,7 @@ type Geolocation struct {
 	Coordinates [2]float64 `bson:"coordinates" json:"coordinates"`
 }
 
-type checkIn struct {
+type CheckIn struct {
 	//Created   time.Time     `bson:"created" json:"created"`
 	//CheckUser bson.ObjectId `bson:"user" json:"user"`
 	CheckUser string `bson:"user" json:"user"`
@@ -20,14 +20,14 @@ type checkIn struct {
 
 type Marker struct {
 	Id          bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
-	Geolocation Geolocation   `json:"geolocation"`
-	Name        string        `json:"name"`
-	Address     string        `json:"address"`
-	Website     string        `json:"website"`
-	Kind        int           `json:"kind"`
-	Else        string        `json:"else"`
-	Author      string        `json:"author"`
-	CheckIns    []checkIn     `json:"checkins"`
+	Geolocation Geolocation   `json:"geolocation,omitempty"`
+	Name        string        `json:"name,omitempty"`
+	Address     string        `json:"address,omitempty"`
+	Website     string        `json:"website,omitempty"`
+	Kind        int           `json:"kind,omitempty"`
+	Else        string        `json:"else,omitempty"`
+	Author      string        `json:"author,omitempty"`
+	CheckIns    []CheckIn     `json:"checkins,omitempty"`
 }
 
 type MarkerCollection struct {
@@ -77,7 +77,22 @@ func (r *MarkerRepo) Create(marker *Marker) error {
 }
 
 func (r *MarkerRepo) Update(marker *Marker) error {
-	err := r.Coll.UpdateId(marker.Id, marker)
+	// no need, Update Id below does updating over that id
+	//currentMarker := MarkerResource{}
+	//err := r.Coll.FindId(marker.Id).One(&currentMarker.Data)
+	//if err != nil {
+	//	return err
+	//}
+
+	// TODO: update all fields merge data:
+	//http://stackoverflow.com/questions/18926303/iterate-through-a-struct-in-go
+	//currentMarker.Data.CheckIns = marker.CheckIns
+
+	//err := r.Coll.UpdateId(marker.Id, marker)
+	//	err := r.Coll.UpdateId(marker.Id, bson.M{"$push": bson.M{"checkins": bson.M{"$each": marker.CheckIns}}}, true)
+	err := r.Coll.UpdateId(marker.Id, bson.M{"$addToSet": bson.M{"checkins": bson.M{"$each": marker.CheckIns}}})
+	//err := r.Coll.Update(bson.M{"id": marker.Id}, bson.M{"$push": bson.M{"checkins": bson.M{"$each": marker.CheckIns}}})
+	//err = r.Coll.UpdateId(marker.Id, currentMarker.Data)
 	if err != nil {
 		return err
 	}

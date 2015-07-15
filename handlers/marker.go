@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/context"
 	"github.com/julienschmidt/httprouter"
 	"goapi/repos"
@@ -53,7 +54,10 @@ func (c *AppContext) CreateMarkerHandler(w http.ResponseWriter, r *http.Request)
 func (c *AppContext) UpdateMarkerHandler(w http.ResponseWriter, r *http.Request) {
 	params := context.Get(r, "params").(httprouter.Params)
 	body := context.Get(r, "body").(*repos.MarkerResource)
+	fmt.Printf("userId")
+	userId := context.Get(r, "userid").(string)
 	body.Data.Id = bson.ObjectIdHex(params.ByName("id"))
+	body.Data.CheckIns = []repos.CheckIn{{userId}}
 	repo := repos.MarkerRepo{c.Db.C("markers")}
 	err := repo.Update(&body.Data)
 	if err != nil {

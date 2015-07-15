@@ -65,6 +65,7 @@ func (c *AppContext) AuthUserHandler(w http.ResponseWriter, r *http.Request) {
 	data = map[string]string{
 		"token": tokenString,
 	}
+
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 	json.NewEncoder(w).Encode(data)
 }

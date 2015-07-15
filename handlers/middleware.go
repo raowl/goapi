@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/context"
 	"goapi/config"
@@ -62,21 +63,30 @@ func AuthHandler(next http.Handler) http.Handler {
 			return PublicKey, nil
 		})
 
+		fmt.Printf("aca estoy")
 		if err != nil {
 			utils.WriteError(w, utils.ErrInternalServer)
 			return
 		}
 		if token.Valid == false {
+			fmt.Printf("token malo")
 			//YAY!
 			utils.WriteError(w, utils.ErrInternalServer)
 			return
 		}
+
+		fmt.Printf("token valido\n")
+		fmt.Printf("%+v\n", token)
+
+		/*	fmt.Printf("user id")
+			fmt.Printf("\n%s\n", token.Claims["userid"])
+		*/
 		/* if err != nil {
 			http.Error(w, http.StatusText(401), 401)
 			return
 		} */
 
-		//context.Set(r, "user", user)
+		context.Set(r, "userid", token.Claims["userid"].(string))
 		next.ServeHTTP(w, r)
 	}
 
