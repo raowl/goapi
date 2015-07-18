@@ -4,11 +4,14 @@ import (
 	"encoding/json"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/context"
+	"github.com/julienschmidt/httprouter"
 	"goapi/config"
 	"goapi/repos"
+	"gopkg.in/mgo.v2/bson"
 	"io/ioutil"
 	"net/http"
 	//"path/filepath"
+	"fmt"
 	"time"
 )
 
@@ -31,6 +34,18 @@ func (c *AppContext) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (c *AppContext) UserHandler(w http.ResponseWriter, r *http.Request) {
+	params := context.Get(r, "params").(httprouter.Params)
+	repo := repos.UserRepo{c.Db.C("users")}
+	marker, err := repo.Find(params.ByName("id"))
+	if err != nil {
+		panic(err)
+	}
+
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	json.NewEncoder(w).Encode(marker)
+}
+
 //POST: /api/v1/user/login/ handler
 func (c *AppContext) AuthUserHandler(w http.ResponseWriter, r *http.Request) {
 	var (
@@ -42,7 +57,8 @@ func (c *AppContext) AuthUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	data := map[string]string{"token": ""}
+	//data := map[string]interface{"token": ""}
+	//var data interface{}
 
 	// Create JWT token
 	token := jwt.New(jwt.GetSigningMethod("RS256"))
@@ -62,12 +78,32 @@ func (c *AppContext) AuthUserHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	data = map[string]string{
-		"token": tokenString,
+	fmt.Println("aca")
+	fmt.Println(user_resource.Data.Skills)
+	data := map[string]interface{}{
+		"token":  tokenString,
+		"skills": user_resource.Data.Skills,
 	}
 
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 	json.NewEncoder(w).Encode(data)
+}
+
+func (c *AppContext) UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
+	//params := context.Get(r, "params").(httprouter.Params)
+	body := context.Get(r, "body").(*repos.UserResource)
+	fmt.Printf("userId")
+	userId := context.Get(r, "userid").(string)
+	body.Data.Id = bson.ObjectIdHex(userId)
+	//body.Data.Skills = []repos.Skill{{userId}}
+	repo := repos.UserRepo{c.Db.C("users")}
+	err := repo.Update(&body.Data)
+	if err != nil {
+		panic(err)
+	}
+
+	w.WriteHeader(204)
+	w.Write([]byte("\n"))
 }
 
 //POST:/api/v1/developers/logout/ handler

@@ -25,7 +25,10 @@ func main() {
 	router.Delete("/markers/:id", commonMiddleware.ThenFunc(appC.DeleteMarkerHandler))
 	router.Get("/markers", commonMiddleware.ThenFunc(appC.MarkersHandler))
 	router.Post("/markers", commonMiddleware.Append(handlers.AuthHandler, handlers.ContentTypeHandler, handlers.BodyHandler(repos.MarkerResource{})).ThenFunc(appC.CreateMarkerHandler))
+	router.Get("/skills", commonMiddleware.ThenFunc(appC.SkillsHandler))
 	router.Post("/api/v1/user/auth", commonMiddleware.Append(handlers.ContentTypeHandler, handlers.BodyHandler(repos.UserResource{})).ThenFunc(appC.AuthUserHandler))
 	router.Post("/api/v1/user", commonMiddleware.Append(handlers.ContentTypeHandler, handlers.BodyHandler(repos.UserResource{})).ThenFunc(appC.CreateUserHandler))
+	router.Put("/api/v1/user", commonMiddleware.Append(handlers.ContentTypeHandler, handlers.AuthHandler, handlers.BodyHandler(repos.UserResource{})).ThenFunc(appC.UpdateUserHandler))
+	router.Get("/api/v1/user/:id", commonMiddleware.ThenFunc(appC.UserHandler))
 	http.ListenAndServe(":8080", router)
 }

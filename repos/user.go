@@ -9,17 +9,26 @@ import (
 	"time"
 )
 
+/* type UserSkills struct {
+	//Created   time.Time     `bson:"created" json:"created"`
+	//CheckUser bson.ObjectId `bson:"user" json:"user"`
+	SkillId string `bson:"skill" json:"skill"`
+} */
 type User struct {
 	Id       bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
-	Username string        `bson:"username" json:"username"`
-	Email    string        `bson:"email" json:"email"`
-	Verified bool          `bson:"verified" json:"verified"`
-	Password string        `json:"password"` //only used for parsing incoming json
-	Hash     string        `bson:"hash"`
-	Salt     string        `bson:"salt"`
-	Created  time.Time     `bson:"created" json:"created"`
-	Updated  time.Time     `bson:"updated" json:"updated"`
-	UrlToken string        `bson:"urltoken" json:"urltoken"`
+	Username string        `bson:"username,omitempty" json:"username,omitempty"`
+	Email    string        `bson:"email,omitempty" json:"email,omitempty"`
+	Verified bool          `bson:"verified,omitempty" json:"verified,omitempty"`
+	Password string        `json:"password,omitempty"` //only used for parsing incoming json
+	Hash     string        `bson:"hash,omitempty"`
+	Salt     string        `bson:"salt,omitempty"`
+	Created  time.Time     `bson:"created,omitempty" json:"created,omitempty"`
+	Updated  time.Time     `bson:"updated,omitempty" json:"updated,omitempty"`
+	UrlToken string        `bson:"urltoken,omitempty" json:"urltoken,omitempty"`
+	About    string        `bson:"about,omitempty" json:"about,omitempty"`
+	// TODO: make bson object objects id better...
+	Skills []bson.ObjectId `bson:"skills,omitempty" json:"skills,omitempty"`
+	//Skills string `bson:"skills" json:"skills"`
 	//	UserMarker []Marker      `bson:"markers" json:"markers"`
 }
 
@@ -93,13 +102,22 @@ func (r *UserRepo) Create(user *User) error {
 }
 
 func (r *UserRepo) Update(user *User) error {
-	err := r.Coll.UpdateId(user.Id, user)
+	err := r.Coll.UpdateId(user.Id, bson.M{"$set": user})
 	if err != nil {
 		return err
 	}
 
 	return nil
 }
+
+/* func (r *UserRepo) Update(user *User) error {
+	err := r.Coll.UpdateId(user.Id, user)
+	if err != nil {
+		return err
+	}
+
+	return nil
+} */
 
 func (r *UserRepo) Delete(id string) error {
 	err := r.Coll.RemoveId(bson.ObjectIdHex(id))
