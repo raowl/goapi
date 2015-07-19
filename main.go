@@ -21,6 +21,7 @@ func main() {
 	commonMiddleware := alice.New(context.ClearHandler, handlers.LoggingHandler, handlers.RecoverHandler, handlers.AcceptHandler)
 	router := NewRouter()
 	router.Get("/markers/:id", commonMiddleware.ThenFunc(appC.MarkerHandler))
+	router.Get("/markers/:id/users", commonMiddleware.ThenFunc(appC.MarkerWithUsersHandler))
 	router.Put("/markers/:id", commonMiddleware.Append(handlers.ContentTypeHandler, handlers.AuthHandler, handlers.BodyHandler(repos.MarkerResource{})).ThenFunc(appC.UpdateMarkerHandler))
 	router.Delete("/markers/:id", commonMiddleware.ThenFunc(appC.DeleteMarkerHandler))
 	router.Get("/markers", commonMiddleware.ThenFunc(appC.MarkersHandler))

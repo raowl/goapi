@@ -54,6 +54,16 @@ func (r *UserRepo) All() (UserCollection, error) {
 	return result, nil
 }
 
+func (r *UserRepo) GetByIds(ids []bson.ObjectId) (UserCollection, error) {
+	result := UserCollection{[]User{}}
+	err := r.Coll.Find(bson.M{"_id": bson.M{"$in": ids}}).All(&result.Data)
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
 func (r *UserRepo) Authenticate(user User) (UserResource, error) {
 	// dry use next function
 	result := UserResource{}

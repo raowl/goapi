@@ -15,7 +15,7 @@ type Geolocation struct {
 type CheckIn struct {
 	//Created   time.Time     `bson:"created" json:"created"`
 	//CheckUser bson.ObjectId `bson:"user" json:"user"`
-	CheckUser string `bson:"user" json:"user"`
+	CheckUser bson.ObjectId `bson:"user" json:"user"`
 }
 
 type Marker struct {
