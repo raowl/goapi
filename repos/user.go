@@ -26,6 +26,7 @@ type User struct {
 	Updated  time.Time     `bson:"updated,omitempty" json:"updated,omitempty"`
 	UrlToken string        `bson:"urltoken,omitempty" json:"urltoken,omitempty"`
 	About    string        `bson:"about,omitempty" json:"about,omitempty"`
+	Image    string        `bson:"image,omitempty" json:"image,omitempty"`
 	// TODO: make bson object objects id better...
 	Skills []bson.ObjectId `bson:"skills,omitempty" json:"skills,omitempty"`
 	//Skills string `bson:"skills" json:"skills"`

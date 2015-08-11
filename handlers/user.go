@@ -37,13 +37,24 @@ func (c *AppContext) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 func (c *AppContext) UserHandler(w http.ResponseWriter, r *http.Request) {
 	params := context.Get(r, "params").(httprouter.Params)
 	repo := repos.UserRepo{c.Db.C("users")}
-	marker, err := repo.Find(params.ByName("id"))
+
+	var err error
+	var user repos.UserResource
+
+	if params.ByName("id") != "undefined" {
+		fmt.Println("entro por aca")
+		user, err = repo.Find(params.ByName("id"))
+	} else {
+		userId := context.Get(r, "userid").(string)
+		user, err = repo.Find(userId)
+	}
+
 	if err != nil {
 		panic(err)
 	}
 
 	w.Header().Set("Content-Type", "application/vnd.api+json")
-	json.NewEncoder(w).Encode(marker)
+	json.NewEncoder(w).Encode(user)
 }
 
 //POST: /api/v1/user/login/ handler
@@ -82,6 +93,7 @@ func (c *AppContext) AuthUserHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(user_resource.Data.Skills)
 	data := map[string]interface{}{
 		"token":  tokenString,
+		"id":     user_resource.Data.Id,
 		"skills": user_resource.Data.Skills,
 	}
 
