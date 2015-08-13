@@ -31,5 +31,6 @@ func main() {
 	router.Post("/api/v1/user", commonMiddleware.Append(handlers.ContentTypeHandler, handlers.BodyHandler(repos.UserResource{})).ThenFunc(appC.CreateUserHandler))
 	router.Put("/api/v1/user", commonMiddleware.Append(handlers.ContentTypeHandler, handlers.AuthHandler, handlers.BodyHandler(repos.UserResource{})).ThenFunc(appC.UpdateUserHandler))
 	router.Get("/api/v1/user/:id", commonMiddleware.Append(handlers.AuthHandler).ThenFunc(appC.UserHandler))
+	router.Get("/api/v1/user/:id/skills", commonMiddleware.ThenFunc(appC.UserWithSkillsHandler))
 	http.ListenAndServe(":8080", router)
 }

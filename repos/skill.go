@@ -14,8 +14,9 @@ type SkillCategory struct {
 }
 
 type Skill struct {
-	Id   bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
-	Name string        `json:"name,omitempty"`
+	Id       bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
+	Name     string        `json:"name,omitempty"`
+	Category bson.ObjectId `json:"category,omitempty" bson:"category,omitempty"`
 }
 
 type SkillCategoryCollection struct {
@@ -28,6 +29,46 @@ type SkillCategoryResource struct {
 
 type SkillCategoryRepo struct {
 	Coll *mgo.Collection
+}
+
+type SkillRepo struct {
+	Coll *mgo.Collection
+}
+
+type SkillCollection struct {
+	Data []Skill `json:"data"`
+}
+
+func (r *SkillRepo) All() (SkillCollection, error) {
+	result := SkillCollection{[]Skill{}}
+	err := r.Coll.Find(nil).All(&result.Data)
+	if err != nil {
+		return result, err
+	}
+
+	fmt.Println(result)
+
+	return result, nil
+}
+
+func (r *SkillRepo) GetByIds(ids []bson.ObjectId) (SkillCollection, error) {
+	result := SkillCollection{[]Skill{}}
+	err := r.Coll.Find(bson.M{"_id": bson.M{"$in": ids}}).All(&result.Data)
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
+func (r *SkillCategoryRepo) GetById(id bson.ObjectId) (SkillCategoryResource, error) {
+	result := SkillCategoryResource{}
+	err := r.Coll.FindId(id).One(&result.Data)
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
 }
 
 func (r *SkillCategoryRepo) All() (SkillCategoryCollection, error) {
