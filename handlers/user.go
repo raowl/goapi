@@ -69,13 +69,13 @@ func (c *AppContext) UserWithSkillsHandler(w http.ResponseWriter, r *http.Reques
 
 	//fmt.Printf("%+v\n", user.Data.Skills)
 	skills, err := repoSkills.GetByIds(user.Data.Skills)
-	fmt.Printf("%+v\n", skills)
+	//fmt.Printf("%+v\n", skills)
 
 	if err != nil {
 		panic(err)
 	}
 
-	type skillCompleteLocal struct {
+	type SkillCompleteLocal struct {
 		Id           bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
 		Name         string        `json:"name,omitempty"`
 		Category     bson.ObjectId `json:"category_id,omitempty" bson:"category_id,omitempty"`
@@ -83,18 +83,26 @@ func (c *AppContext) UserWithSkillsHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	//other way is an $in in every category also in this loop, but gettting by id prob be quicker, check...
-	allInfo := make([]skillCompleteLocal, len(skills.Data))
+	CatSkillInfo := make([]SkillCompleteLocal, len(skills.Data))
 	for i := range skills.Data {
 		category, err := repoCategorySkills.GetById(skills.Data[i].Category)
 		if err != nil {
 			panic(err)
 		}
-		allInfo[i] = skillCompleteLocal{skills.Data[i].Id, skills.Data[i].Name, skills.Data[i].Category, category.Data.Name}
+		CatSkillInfo[i] = SkillCompleteLocal{skills.Data[i].Id, skills.Data[i].Name, skills.Data[i].Category, category.Data.Name}
 	}
 
-	fmt.Printf("%+v\n", allInfo)
+	type AllInfo struct {
+		repos.UserResource
+		CatSkillInfo []SkillCompleteLocal
+	}
+
+	AllInfoI := AllInfo{user, CatSkillInfo}
+	//allInfoI := allInfo{userInfo: user}
+
+	fmt.Printf("%+v\n", CatSkillInfo)
 	w.Header().Set("Content-Type", "application/vnd.api+json")
-	json.NewEncoder(w).Encode(allInfo)
+	json.NewEncoder(w).Encode(AllInfoI)
 }
 
 //POST: /api/v1/user/login/ handler
