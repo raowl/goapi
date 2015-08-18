@@ -63,7 +63,6 @@ func AuthHandler(next http.Handler) http.Handler {
 			return PublicKey, nil
 		})
 
-		fmt.Printf("aca estoy")
 		if err != nil {
 			utils.WriteError(w, utils.ErrInternalServer)
 			return
@@ -76,7 +75,7 @@ func AuthHandler(next http.Handler) http.Handler {
 		}
 
 		fmt.Printf("token valido\n")
-		fmt.Printf("%+v\n", token)
+		//fmt.Printf("%+v\n", token)
 
 		/*	fmt.Printf("user id")
 			fmt.Printf("\n%s\n", token.Claims["userid"])
@@ -120,6 +119,7 @@ func ContentTypeHandler(next http.Handler) http.Handler {
 }
 
 func BodyHandler(v interface{}) func(http.Handler) http.Handler {
+	fmt.Printf("Inside BodyHandler\n")
 	t := reflect.TypeOf(v)
 
 	m := func(next http.Handler) http.Handler {

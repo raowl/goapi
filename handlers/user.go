@@ -100,7 +100,7 @@ func (c *AppContext) UserWithSkillsHandler(w http.ResponseWriter, r *http.Reques
 	AllInfoI := AllInfo{user, CatSkillInfo}
 	//allInfoI := allInfo{userInfo: user}
 
-	fmt.Printf("%+v\n", CatSkillInfo)
+	//fmt.Printf("%+v\n", CatSkillInfo)
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 	json.NewEncoder(w).Encode(AllInfoI)
 }
@@ -138,11 +138,12 @@ func (c *AppContext) AuthUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Println("aca")
-	fmt.Println(user_resource.Data.Skills)
+	//fmt.Println(user_resource.Data.Skills)
 	data := map[string]interface{}{
-		"token":  tokenString,
-		"id":     user_resource.Data.Id,
-		"skills": user_resource.Data.Skills,
+		"token":     tokenString,
+		"id":        user_resource.Data.Id,
+		"skills":    user_resource.Data.Skills,
+		"following": user_resource.Data.Following,
 	}
 
 	w.Header().Set("Content-Type", "application/vnd.api+json")
@@ -150,14 +151,34 @@ func (c *AppContext) AuthUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *AppContext) UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("enter to updateuser handler")
 	//params := context.Get(r, "params").(httprouter.Params)
 	body := context.Get(r, "body").(*repos.UserResource)
 	fmt.Printf("userId")
 	userId := context.Get(r, "userid").(string)
 	body.Data.Id = bson.ObjectIdHex(userId)
+	//body.Data.Skills = []bson.ObjectId{bson.ObjectIdHex(params.ByName("id"))}
+	//body.Data.Following = followingIdArr
 	//body.Data.Skills = []repos.Skill{{userId}}
 	repo := repos.UserRepo{c.Db.C("users")}
 	err := repo.Update(&body.Data)
+	if err != nil {
+		panic(err)
+	}
+
+	w.WriteHeader(204)
+	w.Write([]byte("\n"))
+}
+
+func (c *AppContext) UserUnfollowHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("enter to updateuser handler")
+	params := context.Get(r, "params").(httprouter.Params)
+	fmt.Printf("userId")
+	//userId := context.Get(r, "userid").(string)
+	userId := bson.ObjectIdHex(context.Get(r, "userid").(string))
+	unfollowId := bson.ObjectIdHex(params.ByName("id"))
+	repo := repos.UserRepo{c.Db.C("users")}
+	err := repo.Unfollow(userId, unfollowId)
 	if err != nil {
 		panic(err)
 	}

@@ -3,6 +3,7 @@ package repos
 import (
 	"code.google.com/p/go.crypto/bcrypt"
 	"errors"
+	"fmt"
 	"goapi/utils"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -28,7 +29,8 @@ type User struct {
 	About    string        `bson:"about,omitempty" json:"about,omitempty"`
 	Image    string        `bson:"image,omitempty" json:"image,omitempty"`
 	// TODO: make bson object objects id better...
-	Skills []bson.ObjectId `bson:"skills,omitempty" json:"skills,omitempty"`
+	Skills    []bson.ObjectId `bson:"skills,omitempty" json:"skills,omitempty"`
+	Following []bson.ObjectId `bson:"following,omitempty" json:"following,omitempty"`
 	//Skills string `bson:"skills" json:"skills"`
 	//	UserMarker []Marker      `bson:"markers" json:"markers"`
 }
@@ -112,8 +114,28 @@ func (r *UserRepo) Create(user *User) error {
 	return nil
 }
 
-func (r *UserRepo) Update(user *User) error {
+/* func (r *UserRepo) Update(user *User) error {
 	err := r.Coll.UpdateId(user.Id, bson.M{"$set": user})
+	if err != nil {
+		return err
+	}
+
+	return nil
+} */
+
+func (r *UserRepo) Update(user *User) error {
+	fmt.Printf("Entered to Update")
+	err := r.Coll.UpdateId(user.Id, bson.M{"$addToSet": bson.M{"following": bson.M{"$each": user.Following}}})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *UserRepo) Unfollow(userId bson.ObjectId, unfollowId bson.ObjectId) error {
+	fmt.Printf("Entered to Update")
+	err := r.Coll.UpdateId(userId, bson.M{"$unset": bson.M{"following": unfollowId}})
 	if err != nil {
 		return err
 	}
