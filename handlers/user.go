@@ -69,7 +69,10 @@ func (c *AppContext) UserWithSkillsHandler(w http.ResponseWriter, r *http.Reques
 
 	//fmt.Printf("%+v\n", user.Data.Skills)
 	skills, err := repoSkills.GetByIds(user.Data.Skills)
-	//fmt.Printf("%+v\n", skills)
+	following, err := userRepo.GetByIds(user.Data.Following)
+
+	fmt.Printf("Currently following...\n")
+	fmt.Printf("%+v\n", following)
 
 	if err != nil {
 		panic(err)
@@ -95,12 +98,14 @@ func (c *AppContext) UserWithSkillsHandler(w http.ResponseWriter, r *http.Reques
 	type AllInfo struct {
 		repos.UserResource
 		CatSkillInfo []SkillCompleteLocal
+		Follow       repos.UserCollection
 	}
 
-	AllInfoI := AllInfo{user, CatSkillInfo}
+	AllInfoI := AllInfo{user, CatSkillInfo, following}
 	//allInfoI := allInfo{userInfo: user}
 
-	//fmt.Printf("%+v\n", CatSkillInfo)
+	fmt.Printf("ALL INFO\n")
+	fmt.Printf("%+v\n", AllInfoI)
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 	json.NewEncoder(w).Encode(AllInfoI)
 }
