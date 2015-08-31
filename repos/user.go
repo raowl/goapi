@@ -125,7 +125,10 @@ func (r *UserRepo) Create(user *User) error {
 
 func (r *UserRepo) Update(user *User) error {
 	fmt.Printf("Entered to Update")
+	fmt.Printf("USER DATA")
+	fmt.Printf("%+v\n", user)
 	err := r.Coll.UpdateId(user.Id, bson.M{"$addToSet": bson.M{"following": bson.M{"$each": user.Following}}})
+	err = r.Coll.UpdateId(user.Id, bson.M{"$set": bson.M{"skills": user.Skills, "email": user.Email, "about": user.About}})
 	if err != nil {
 		return err
 	}

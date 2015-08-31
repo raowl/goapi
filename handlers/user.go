@@ -60,19 +60,22 @@ func (c *AppContext) UserHandler(w http.ResponseWriter, r *http.Request) {
 func (c *AppContext) UserWithSkillsHandler(w http.ResponseWriter, r *http.Request) {
 	params := context.Get(r, "params").(httprouter.Params)
 	userRepo := repos.UserRepo{c.Db.C("users")}
+	categorySkillsRepo := repos.SkillCategoryRepo{c.Db.C("skill_category")}
+	skillRepo := repos.SkillRepo{c.Db.C("skill")}
+
 	user, err := userRepo.Find(params.ByName("id"))
 
-	//fmt.Printf("%+v\n", user)
-
-	repoSkills := repos.SkillRepo{c.Db.C("skill")}
-	repoCategorySkills := repos.SkillCategoryRepo{c.Db.C("skill_category")}
-
-	//fmt.Printf("%+v\n", user.Data.Skills)
-	skills, err := repoSkills.GetByIds(user.Data.Skills)
+	fmt.Println("***********************************************************")
+	fmt.Printf("%+v\n", user.Data.Skills)
+	fmt.Println("***********************************************************")
+	skills, err := skillRepo.GetByIds(user.Data.Skills)
 	following, err := userRepo.GetByIds(user.Data.Following)
 
 	fmt.Printf("Currently following...\n")
 	fmt.Printf("%+v\n", following)
+
+	fmt.Printf("Skills...\n")
+	fmt.Printf("%+v\n", skills)
 
 	if err != nil {
 		panic(err)
@@ -80,19 +83,19 @@ func (c *AppContext) UserWithSkillsHandler(w http.ResponseWriter, r *http.Reques
 
 	type SkillCompleteLocal struct {
 		Id           bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
-		Name         string        `json:"name,omitempty"`
-		Category     bson.ObjectId `json:"category_id,omitempty" bson:"category_id,omitempty"`
+		Name         string        `json:"skill_name,omitempty" bson:"skill_name,omitempty"`
+		Category     bson.ObjectId `json:"category,omitempty" bson:"category,omitempty"`
 		CategoryName string        `json:"category_name,omitempty" bson:"category_name,omitempty"`
 	}
 
 	//other way is an $in in every category also in this loop, but gettting by id prob be quicker, check...
 	CatSkillInfo := make([]SkillCompleteLocal, len(skills.Data))
 	for i := range skills.Data {
-		category, err := repoCategorySkills.GetById(skills.Data[i].Category)
+		category, err := categorySkillsRepo.GetById(skills.Data[i].Category)
 		if err != nil {
-			panic(err)
+			print(err)
 		}
-		CatSkillInfo[i] = SkillCompleteLocal{skills.Data[i].Id, skills.Data[i].Name, skills.Data[i].Category, category.Data.Name}
+		CatSkillInfo[i] = SkillCompleteLocal{skills.Data[i].Id, skills.Data[i].Name[0], skills.Data[i].Category, category.Data.Name[0]}
 	}
 
 	type AllInfo struct {
@@ -102,7 +105,7 @@ func (c *AppContext) UserWithSkillsHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	AllInfoI := AllInfo{user, CatSkillInfo, following}
-	//allInfoI := allInfo{userInfo: user}
+	//AllInfoI := ""
 
 	fmt.Printf("ALL INFO\n")
 	fmt.Printf("%+v\n", AllInfoI)
@@ -156,12 +159,14 @@ func (c *AppContext) AuthUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *AppContext) UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("enter to updateuser handler")
+	//fmt.Printf("enter to updateuser handler")
 	//params := context.Get(r, "params").(httprouter.Params)
 	body := context.Get(r, "body").(*repos.UserResource)
-	fmt.Printf("userId")
+	//fmt.Printf("userId")
 	userId := context.Get(r, "userid").(string)
 	body.Data.Id = bson.ObjectIdHex(userId)
+	//fmt.Printf("BODY DATA")
+	//fmt.Printf("%+v\n", body.Data)
 	//body.Data.Skills = []bson.ObjectId{bson.ObjectIdHex(params.ByName("id"))}
 	//body.Data.Following = followingIdArr
 	//body.Data.Skills = []repos.Skill{{userId}}

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"goapi/repos"
 	"net/http"
 )
@@ -11,14 +12,23 @@ import (
 } */
 
 func (c *AppContext) SkillsHandler(w http.ResponseWriter, r *http.Request) {
-	repo := repos.SkillCategoryRepo{c.Db.C("skill_categoryd")}
-	skills, err := repo.All()
+	repo := repos.SkillCategoryRepo{c.Db.C("skill_category")}
+	skillcat, err := repo.All()
+	repo2 := repos.SkillRepo{c.Db.C("skill")}
+	//skillcat, err := repo.All()
+
+	for i := range skillcat.Data {
+		skills, _ := repo2.GetByCategoryId(skillcat.Data[i].Id)
+		fmt.Print(skills)
+		skillcat.Data[i].Skill = skills
+	}
+
 	if err != nil {
 		panic(err)
 	}
 
 	w.Header().Set("Content-Type", "application/vnd.api+json")
-	json.NewEncoder(w).Encode(skills)
+	json.NewEncoder(w).Encode(skillcat)
 }
 
 /* func (c *AppContext) UserWithSkillsHandler(w http.ResponseWriter, r *http.Request) {
