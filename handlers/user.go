@@ -44,11 +44,15 @@ func (c *AppContext) UserHandler(w http.ResponseWriter, r *http.Request) {
 	if params.ByName("id") != "undefined" {
 		fmt.Println("entro por aca")
 		user, err = repo.Find(params.ByName("id"))
-	} else {
+	} /*  else {
 		userId := context.Get(r, "userid").(string)
 		user, err = repo.Find(userId)
-	}
+	} */
 
+	/* if params.ByName("username") != "undefined" {
+		fmt.Println("entro por aca")
+		user, err = repo.Find(params.ByName("username"))
+	} /*  else { */
 	if err != nil {
 		panic(err)
 	}

@@ -20,6 +20,7 @@ type User struct {
 	Username string        `bson:"username,omitempty" json:"username,omitempty"`
 	Email    string        `bson:"email,omitempty" json:"email,omitempty"`
 	Verified bool          `bson:"verified,omitempty" json:"verified,omitempty"`
+	Facebook bool          `bson:"facebook,omitempty" json:"facebook,omitempty"`
 	Password string        `json:"password,omitempty"` //only used for parsing incoming json
 	Hash     string        `bson:"hash,omitempty"`
 	Salt     string        `bson:"salt,omitempty"`
@@ -79,13 +80,26 @@ func (r *UserRepo) Authenticate(user User) (UserResource, error) {
 	print(result.Data.Password)
 	print(user.Password)
 
-	if passwordMatch(user.Password, result) {
+	if result.Data.Facebook {
 		return result, nil
+	} else {
+		if passwordMatch(user.Password, result) {
+			return result, nil
+		}
 	}
 
 	return UserResource{}, errors.New("Passwd dont match")
 }
 
+func (r *UserRepo) FindByUsername(username string) (UserResource, error) {
+	result := UserResource{}
+	err := r.Coll.Find(bson.M{username: username}).One(&result.Data)
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
 func (r *UserRepo) Find(id string) (UserResource, error) {
 	result := UserResource{}
 	err := r.Coll.FindId(bson.ObjectIdHex(id)).One(&result.Data)
@@ -105,6 +119,8 @@ func (r *UserRepo) Create(user *User) error {
 
 	user.Hash = hash
 	user.Salt = salt
+
+	fmt.Printf("%+v\n", user)
 
 	_, err := r.Coll.UpsertId(id, user)
 	if err != nil {
