@@ -16,19 +16,22 @@ import (
 	SkillId string `bson:"skill" json:"skill"`
 } */
 type User struct {
-	Id       bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
-	Username string        `bson:"username,omitempty" json:"username,omitempty"`
-	Email    string        `bson:"email,omitempty" json:"email,omitempty"`
-	Verified bool          `bson:"verified,omitempty" json:"verified,omitempty"`
-	Facebook bool          `bson:"facebook,omitempty" json:"facebook,omitempty"`
-	Password string        `json:"password,omitempty"` //only used for parsing incoming json
-	Hash     string        `bson:"hash,omitempty"`
-	Salt     string        `bson:"salt,omitempty"`
-	Created  time.Time     `bson:"created,omitempty" json:"created,omitempty"`
-	Updated  time.Time     `bson:"updated,omitempty" json:"updated,omitempty"`
-	UrlToken string        `bson:"urltoken,omitempty" json:"urltoken,omitempty"`
-	About    string        `bson:"about,omitempty" json:"about,omitempty"`
-	Image    string        `bson:"image,omitempty" json:"image,omitempty"`
+	Id         bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
+	Username   string        `bson:"username,omitempty" json:"username,omitempty"`
+	FirstName  string        `bson:"firstname,omitempty" json:"firstname,omitempty"`
+	LastName   string        `bson:"lastname,omitempty" json:"lastname,omitempty"`
+	Email      string        `bson:"email,omitempty" json:"email,omitempty"`
+	Verified   bool          `bson:"verified,omitempty" json:"verified,omitempty"`
+	Facebook   bool          `bson:"facebook,omitempty" json:"facebook,omitempty"`
+	Password   string        `json:"password,omitempty"` //only used for parsing incoming json
+	FacebookId string        `bson:"facebookid,omitempty" json:"facebookid,omitempty"`
+	Hash       string        `bson:"hash,omitempty"`
+	Salt       string        `bson:"salt,omitempty"`
+	Created    time.Time     `bson:"created,omitempty" json:"created,omitempty"`
+	Updated    time.Time     `bson:"updated,omitempty" json:"updated,omitempty"`
+	UrlToken   string        `bson:"urltoken,omitempty" json:"urltoken,omitempty"`
+	About      string        `bson:"about,omitempty" json:"about,omitempty"`
+	Image      string        `bson:"image,omitempty" json:"image,omitempty"`
 	// TODO: make bson object objects id better...
 	Skills    []bson.ObjectId `bson:"skills,omitempty" json:"skills,omitempty"`
 	Following []bson.ObjectId `bson:"following,omitempty" json:"following,omitempty"`
