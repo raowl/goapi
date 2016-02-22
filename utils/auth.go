@@ -5,8 +5,8 @@ package utils
 // http://austingwalters.com/building-a-web-server-in-go-salting-passwords/
 
 import (
-	"code.google.com/p/go.crypto/bcrypt"
 	"crypto/rand"
+	"github.com/golang/crypto/bcrypt"
 	"log"
 	"strings"
 )

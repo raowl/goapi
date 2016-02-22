@@ -1,9 +1,9 @@
 package repos
 
 import (
-	"code.google.com/p/go.crypto/bcrypt"
 	"errors"
 	"fmt"
+	"github.com/golang/crypto/bcrypt"
 	"github.com/raowl/goapi/utils"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -27,25 +27,25 @@ type UserF struct {
 }
 
 type User struct {
-	Id         bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
-	Username   string        `bson:"username,omitempty" json:"username,omitempty"`
-	FirstName  string        `bson:"firstname,omitempty" json:"firstname,omitempty"`
-	LastName   string        `bson:"lastname,omitempty" json:"lastname,omitempty"`
-	Email      string        `bson:"email,omitempty" json:"email,omitempty"`
-	Verified   bool          `bson:"verified,omitempty" json:"verified,omitempty"`
-	Facebook   bool          `bson:"facebook,omitempty" json:"facebook,omitempty"`
-	ShowEmail  bool          `bson:"showEmail,omitempty" json:"showEmail,omitempty"`
-	Password   string        `json:"password,omitempty"` //only used for parsing incoming json
-	FacebookId string        `bson:"facebookid,omitempty" json:"facebookid,omitempty"`
-	Hash       string        `bson:"hash,omitempty"`
-	Salt       string        `bson:"salt,omitempty"`
-	Created    time.Time     `bson:"created,omitempty" json:"created,omitempty"`
-	Updated    time.Time     `bson:"updated,omitempty" json:"updated,omitempty"`
-	UrlToken   string        `bson:"urltoken,omitempty" json:"urltoken,omitempty"`
-	About      string        `bson:"about,omitempty" json:"about,omitempty"`
-	FollowInfo []UserF `bson:"followinfo,omitempty" json:"followinfo,omitempty"`
-	FollowedInfo []UserF `bson:"followedinfo,omitempty" json:"followedinfo,omitempty"`
-	Image      string        `bson:"image,omitempty" json:"image,omitempty"`
+	Id           bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
+	Username     string        `bson:"username,omitempty" json:"username,omitempty"`
+	FirstName    string        `bson:"firstname,omitempty" json:"firstname,omitempty"`
+	LastName     string        `bson:"lastname,omitempty" json:"lastname,omitempty"`
+	Email        string        `bson:"email,omitempty" json:"email,omitempty"`
+	Verified     bool          `bson:"verified,omitempty" json:"verified,omitempty"`
+	Facebook     bool          `bson:"facebook,omitempty" json:"facebook,omitempty"`
+	ShowEmail    bool          `bson:"showEmail,omitempty" json:"showEmail,omitempty"`
+	Password     string        `json:"password,omitempty"` //only used for parsing incoming json
+	FacebookId   string        `bson:"facebookid,omitempty" json:"facebookid,omitempty"`
+	Hash         string        `bson:"hash,omitempty"`
+	Salt         string        `bson:"salt,omitempty"`
+	Created      time.Time     `bson:"created,omitempty" json:"created,omitempty"`
+	Updated      time.Time     `bson:"updated,omitempty" json:"updated,omitempty"`
+	UrlToken     string        `bson:"urltoken,omitempty" json:"urltoken,omitempty"`
+	About        string        `bson:"about,omitempty" json:"about,omitempty"`
+	FollowInfo   []UserF       `bson:"followinfo,omitempty" json:"followinfo,omitempty"`
+	FollowedInfo []UserF       `bson:"followedinfo,omitempty" json:"followedinfo,omitempty"`
+	Image        string        `bson:"image,omitempty" json:"image,omitempty"`
 	// TODO: make bson object objects id better...
 	Skills    []bson.ObjectId `bson:"skills,omitempty" json:"skills,omitempty"`
 	Following []bson.ObjectId `bson:"following,omitempty" json:"following,omitempty"`
@@ -137,10 +137,10 @@ func (r *UserRepo) UserAlreadyExists(username string) (bool, error) {
 	fmt.Println(username)
 	fmt.Println(count)
 	if count > 0 {
- 		fmt.Println("user already exists")
+		fmt.Println("user already exists")
 		return true, nil
 	} else {
- 		fmt.Println("user dont exists")
+		fmt.Println("user dont exists")
 		return false, nil
 	}
 }
