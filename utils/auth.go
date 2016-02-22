@@ -6,7 +6,7 @@ package utils
 
 import (
 	"crypto/rand"
-	"github.com/golang/crypto/bcrypt"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 	"strings"
 )

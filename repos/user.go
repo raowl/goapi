@@ -3,8 +3,8 @@ package repos
 import (
 	"errors"
 	"fmt"
-	"github.com/golang/crypto/bcrypt"
 	"github.com/raowl/goapi/utils"
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"strings"
