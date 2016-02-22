@@ -4,7 +4,7 @@ Simple RESTful JSON API in Golang and MongoDB.
 
 For creating your own key files inside config directory:  
   
-$ openssl genrsa -out demo.rsa 1024
+$ openssl genrsa -out demo.rsa 1024  
 $ openssl rsa -in demo.rsa -pubout > demo.rsa.pub   
 
 ## Api examples:
