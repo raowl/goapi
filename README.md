@@ -1,11 +1,11 @@
-# goapi
+# GoApi
 
-A work in progress to make practical golang api with good practices that serves as a base for my own projects.
-It needs mongodb running on the server.
+Simple RESTful JSON API in Golang and MongoDB.  
 
-for creating your own key files inside config directory:
-$ openssl genrsa -out demo.rsa 1024 # the 1024 is the size of the key we are generating
-$ openssl rsa -in demo.rsa -pubout > demo.rsa.pub 
+For creating your own key files inside config directory:  
+  
+$ openssl genrsa -out demo.rsa 1024 # the 1024 is the size of the key we are generating  
+$ openssl rsa -in demo.rsa -pubout > demo.rsa.pub   
 
 ## Api examples:
 
@@ -47,4 +47,3 @@ http://localhost:8080/markers
 http://nicolasmerouze.com/build-web-framework-golang/  
 https://sendgrid.com/blog/tokens-tokens-intro-json-web-tokens-jwt-go/  
 
-I will be glad if you can join me in the development, thanks for reading.
