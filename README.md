@@ -35,7 +35,8 @@ http://localhost:8080/markers
 
 * get markers 
 
-``` curl -H \
+``` 
+curl -H \
 "Authorization: Bearer REPLACEWITHTOKEN" \
 -H "Accept: application/vnd.api+json" -H 'Content-Type: application/vnd.api+json' \
 http://localhost:8080/markers
