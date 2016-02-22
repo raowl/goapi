@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/gorilla/context"
 	"github.com/julienschmidt/httprouter"
-	"goapi/repos"
+	"github.com/raowl/goapi/repos"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"net/http"
@@ -16,8 +16,10 @@ type AppContext struct {
 }
 
 func (c *AppContext) MarkersHandler(w http.ResponseWriter, r *http.Request) {
+	params := context.Get(r, "params").(httprouter.Params)
 	repo := repos.MarkerRepo{c.Db.C("markers")}
-	markers, err := repo.All()
+	markers, err := repo.All(params.ByName("lat"), params.ByName("lng"), params.ByName("km"))
+
 	if err != nil {
 		panic(err)
 	}

@@ -3,7 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"goapi/repos"
+	"github.com/raowl/goapi/repos"
 	"net/http"
 )
 
@@ -13,12 +13,17 @@ import (
 
 func (c *AppContext) SkillsHandler(w http.ResponseWriter, r *http.Request) {
 	repo := repos.SkillCategoryRepo{c.Db.C("skill_category")}
-	skillcat, err := repo.All()
 	repo2 := repos.SkillRepo{c.Db.C("skill")}
+	// params := context.Get(r, "params").(httprouter.Params)
+	//lang := params.ByName("lang")
+	lang := r.FormValue("lang")
+	print("-----------------------------")
+	print(lang)
+	skillcat, err := repo.All(lang)
 	//skillcat, err := repo.All()
 
 	for i := range skillcat.Data {
-		skills, _ := repo2.GetByCategoryId(skillcat.Data[i].Id)
+		skills, _ := repo2.GetByCategoryId(skillcat.Data[i].Id, lang)
 		fmt.Print(skills)
 		skillcat.Data[i].Skill = skills
 	}
@@ -32,9 +37,9 @@ func (c *AppContext) SkillsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 /* func (c *AppContext) UserWithSkillsHandler(w http.ResponseWriter, r *http.Request) {
+	user, err := repo.Find(params.ByName("id"))
 	params := context.Get(r, "params").(httprouter.Params)
 	repo := repos.userRepo{c.Db.C("users")}
-	user, err := repo.Find(params.ByName("id"))
 
 	//fmt.Printf("%+v\n", marker)
 

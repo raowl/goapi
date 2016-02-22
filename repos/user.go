@@ -4,9 +4,10 @@ import (
 	"code.google.com/p/go.crypto/bcrypt"
 	"errors"
 	"fmt"
-	"goapi/utils"
+	"github.com/raowl/goapi/utils"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"strings"
 	"time"
 )
 
@@ -15,6 +16,16 @@ import (
 	//CheckUser bson.ObjectId `bson:"user" json:"user"`
 	SkillId string `bson:"skill" json:"skill"`
 } */
+
+type UserF struct {
+	Id         bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
+	Username   string        `bson:"username,omitempty" json:"username,omitempty"`
+	FirstName  string        `bson:"firstname,omitempty" json:"firstname,omitempty"`
+	LastName   string        `bson:"lastname,omitempty" json:"lastname,omitempty"`
+	FacebookId string        `bson:"facebookid,omitempty" json:"facebookid,omitempty"`
+	Image      string        `bson:"image,omitempty" json:"image,omitempty"`
+}
+
 type User struct {
 	Id         bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
 	Username   string        `bson:"username,omitempty" json:"username,omitempty"`
@@ -23,6 +34,7 @@ type User struct {
 	Email      string        `bson:"email,omitempty" json:"email,omitempty"`
 	Verified   bool          `bson:"verified,omitempty" json:"verified,omitempty"`
 	Facebook   bool          `bson:"facebook,omitempty" json:"facebook,omitempty"`
+	ShowEmail  bool          `bson:"showEmail,omitempty" json:"showEmail,omitempty"`
 	Password   string        `json:"password,omitempty"` //only used for parsing incoming json
 	FacebookId string        `bson:"facebookid,omitempty" json:"facebookid,omitempty"`
 	Hash       string        `bson:"hash,omitempty"`
@@ -31,6 +43,8 @@ type User struct {
 	Updated    time.Time     `bson:"updated,omitempty" json:"updated,omitempty"`
 	UrlToken   string        `bson:"urltoken,omitempty" json:"urltoken,omitempty"`
 	About      string        `bson:"about,omitempty" json:"about,omitempty"`
+	FollowInfo []UserF `bson:"followinfo,omitempty" json:"followinfo,omitempty"`
+	FollowedInfo []UserF `bson:"followedinfo,omitempty" json:"followedinfo,omitempty"`
 	Image      string        `bson:"image,omitempty" json:"image,omitempty"`
 	// TODO: make bson object objects id better...
 	Skills    []bson.ObjectId `bson:"skills,omitempty" json:"skills,omitempty"`
@@ -54,6 +68,26 @@ type UserRepo struct {
 func (r *UserRepo) All() (UserCollection, error) {
 	result := UserCollection{[]User{}}
 	err := r.Coll.Find(nil).All(&result.Data)
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
+func (r *UserRepo) GetFollowers(id bson.ObjectId) ([]UserF, error) {
+	result := []UserF{}
+	err := r.Coll.Find(bson.M{"following": id}).All(&result)
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
+func (r *UserRepo) GetFByIds(ids []bson.ObjectId) ([]UserF, error) {
+	result := []UserF{}
+	err := r.Coll.Find(bson.M{"_id": bson.M{"$in": ids}}).All(&result)
 	if err != nil {
 		return result, err
 	}
@@ -94,21 +128,32 @@ func (r *UserRepo) Authenticate(user User) (UserResource, error) {
 	return UserResource{}, errors.New("Passwd dont match")
 }
 
-func (r *UserRepo) FindByUsername(username string) (UserResource, error) {
-	result := UserResource{}
-	err := r.Coll.Find(bson.M{username: username}).One(&result.Data)
+func (r *UserRepo) UserAlreadyExists(username string) (bool, error) {
+	count, err := r.Coll.Find(bson.M{"username": username}).Count()
 	if err != nil {
-		return result, err
+		return false, err
 	}
 
-	return result, nil
+	fmt.Println(username)
+	fmt.Println(count)
+	if count > 0 {
+ 		fmt.Println("user already exists")
+		return true, nil
+	} else {
+ 		fmt.Println("user dont exists")
+		return false, nil
+	}
 }
 func (r *UserRepo) Find(id string) (UserResource, error) {
 	result := UserResource{}
 	err := r.Coll.FindId(bson.ObjectIdHex(id)).One(&result.Data)
 	if err != nil {
+		fmt.Println("inside repo error----------")
 		return result, err
 	}
+
+	fmt.Println("inside repo ussssssssssssssssssssssssssssssser")
+	fmt.Printf("%+v\n", result)
 
 	return result, nil
 }
@@ -122,6 +167,8 @@ func (r *UserRepo) Create(user *User) error {
 
 	user.Hash = hash
 	user.Salt = salt
+
+	user.Username = strings.ToLower(user.Username)
 
 	fmt.Printf("%+v\n", user)
 
@@ -147,7 +194,7 @@ func (r *UserRepo) Update(user *User) error {
 	fmt.Printf("USER DATA")
 	fmt.Printf("%+v\n", user)
 	err := r.Coll.UpdateId(user.Id, bson.M{"$addToSet": bson.M{"following": bson.M{"$each": user.Following}}})
-	err = r.Coll.UpdateId(user.Id, bson.M{"$set": bson.M{"skills": user.Skills, "email": user.Email, "about": user.About}})
+	err = r.Coll.UpdateId(user.Id, bson.M{"$set": bson.M{"skills": user.Skills, "email": user.Email, "image": user.Image, "about": user.About}})
 	if err != nil {
 		return err
 	}
@@ -156,8 +203,11 @@ func (r *UserRepo) Update(user *User) error {
 }
 
 func (r *UserRepo) Unfollow(userId bson.ObjectId, unfollowId bson.ObjectId) error {
-	fmt.Printf("Entered to Update")
-	err := r.Coll.UpdateId(userId, bson.M{"$unset": bson.M{"following": unfollowId}})
+	fmt.Printf("Entered to Unfollow..........................")
+	fmt.Println(userId)
+	fmt.Println(unfollowId)
+	fmt.Printf("%+v\n", unfollowId)
+	err := r.Coll.UpdateId(userId, bson.M{"$pull": bson.M{"following": unfollowId}})
 	if err != nil {
 		return err
 	}

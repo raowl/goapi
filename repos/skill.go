@@ -54,10 +54,15 @@ type SkillCollection struct {
 	Data []SkillTemp `json:"data"`
 }
 
-func (r *SkillRepo) All() (SkillCollection, error) {
+func (r *SkillRepo) All(lang string) (SkillCollection, error) {
 	result := SkillCollection{[]SkillTemp{}}
+	var err error
 	// err := r.Coll.Find(nil, bson.M{"$slice": []int{1,1}}).All(&result.Data)
-	err := r.Coll.Find(bson.M{"name": bson.M{"$slice": []int{1, 1}}}).All(&result.Data)
+	if lang == "es" {
+		err = r.Coll.Find(bson.M{"name": bson.M{"$slice": []int{1, 1}}}).All(&result.Data)
+	} else {
+		err = r.Coll.Find(bson.M{"name": bson.M{"$slice": []int{0, 1}}}).All(&result.Data)
+	}
 	if err != nil {
 		return result, err
 	}
@@ -65,9 +70,16 @@ func (r *SkillRepo) All() (SkillCollection, error) {
 	return result, nil
 }
 
-func (r *SkillRepo) GetByCategoryId(id bson.ObjectId) ([]Skill, error) {
+func (r *SkillRepo) GetByCategoryId(id bson.ObjectId, lang string) ([]Skill, error) {
 	result := []SkillTemp{}
-	err := r.Coll.Find(bson.M{"category": id}).Select(bson.M{"name": bson.M{"$slice": []int{1, 1}}}).All(&result)
+	var err error
+	print("LANGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG======================================")
+	print(lang)
+	if lang == "es" {
+		err = r.Coll.Find(bson.M{"category": id}).Select(bson.M{"name": bson.M{"$slice": []int{1, 1}}}).All(&result)
+	} else {
+		err = r.Coll.Find(bson.M{"category": id}).Select(bson.M{"name": bson.M{"$slice": []int{0, 1}}}).All(&result)
+	}
 	if err != nil {
 		log.Fatal("error")
 	}
@@ -79,15 +91,20 @@ func (r *SkillRepo) GetByCategoryId(id bson.ObjectId) ([]Skill, error) {
 
 	return skillsallnew, nil
 }
-func (r *SkillRepo) GetByIds(ids []bson.ObjectId) (SkillCollection, error) {
+func (r *SkillRepo) GetByIds(ids []bson.ObjectId, lang string) (SkillCollection, error) {
 	result := SkillCollection{[]SkillTemp{}}
+	var err error
 	fmt.Println("SKILL IDS....")
 	fmt.Printf("%+v\n", ids)
 	/* oids := make([]bson.ObjectId, len(ids))
 	for i := range ids {
 		oids[i] = bson.ObjectId(ids[i])
 	} */
-	err := r.Coll.Find(bson.M{"_id": bson.M{"$in": ids}}).Select(bson.M{"name": bson.M{"$slice": []int{1, 1}}}).All(&result.Data)
+	if lang == "es" {
+		err = r.Coll.Find(bson.M{"_id": bson.M{"$in": ids}}).Select(bson.M{"name": bson.M{"$slice": []int{1, 1}}}).All(&result.Data)
+	} else {
+		err = r.Coll.Find(bson.M{"_id": bson.M{"$in": ids}}).Select(bson.M{"name": bson.M{"$slice": []int{0, 1}}}).All(&result.Data)
+	}
 
 	fmt.Println("REEEEEEEEEEEEEEEEEEEEEEEESSSSSULT")
 	fmt.Printf("%v\n", result)
@@ -98,9 +115,16 @@ func (r *SkillRepo) GetByIds(ids []bson.ObjectId) (SkillCollection, error) {
 	return result, nil
 }
 
-func (r *SkillCategoryRepo) GetById(id bson.ObjectId) (SkillCategoryResource, error) {
+func (r *SkillCategoryRepo) GetById(id bson.ObjectId, lang string) (SkillCategoryResource, error) {
 	result := SkillCategoryResource{}
-	err := r.Coll.FindId(id).One(&result.Data)
+	var err error
+	// err := r.Coll.FindId(id).One(&result.Data)
+	if lang == "es" {
+	err = r.Coll.FindId(id).Select(bson.M{"name": bson.M{"$slice": []int{1, 1}}}).One(&result.Data)
+	} else {
+	err = r.Coll.FindId(id).Select(bson.M{"name": bson.M{"$slice": []int{0, 1}}}).One(&result.Data)
+	}
+	//err := r.Coll.Find(bson.M{"id": id}).Select(bson.M{"name": bson.M{"$slice": []int{1, 1}}}).one(&result)
 	fmt.Println("ACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 	fmt.Printf("%+v\n", result)
 	if err != nil {
@@ -110,9 +134,15 @@ func (r *SkillCategoryRepo) GetById(id bson.ObjectId) (SkillCategoryResource, er
 	return result, nil
 }
 
-func (r *SkillCategoryRepo) All() (SkillCategoryCollection, error) {
+func (r *SkillCategoryRepo) All(lang string) (SkillCategoryCollection, error) {
 	result := SkillTempCategoryCollection{[]SkillTempCategory{}}
-	err := r.Coll.Find(bson.M{}).Select(bson.M{"name": bson.M{"$slice": []int{1, 1}}}).All(&result.Data)
+	var err error
+	if lang == "es" {
+		err = r.Coll.Find(bson.M{}).Select(bson.M{"name": bson.M{"$slice": []int{1, 1}}}).All(&result.Data)
+	} else {
+		err = r.Coll.Find(bson.M{}).Select(bson.M{"name": bson.M{"$slice": []int{0, 1}}}).All(&result.Data)
+        }
+
 	if err != nil {
 		log.Fatal("Error")
 	}

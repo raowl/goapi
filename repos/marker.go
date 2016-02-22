@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"strconv"
 	//"time"
 )
 
@@ -42,9 +43,20 @@ type MarkerRepo struct {
 	Coll *mgo.Collection
 }
 
-func (r *MarkerRepo) All() (MarkerCollection, error) {
+func (r *MarkerRepo) All(lat string, lng string, km string) (MarkerCollection, error) {
+
+	latf, err := strconv.ParseFloat(lat, 64)
+	lngf, err := strconv.ParseFloat(lng, 64)
+	//kmf, err := strconv.ParseFloat(km, 64)
+	kmf, err := strconv.ParseInt(km, 10, 64)
 	result := MarkerCollection{[]Marker{}}
-	err := r.Coll.Find(nil).All(&result.Data)
+	fmt.Println("gobend")
+	fmt.Println(latf)
+	fmt.Println(lngf)
+	fmt.Println(kmf)
+	//err = r.Coll.Find(bson.M{"geolocation.coordinates": bson.M{"$near": []float64{latf, lngf}, "$maxDistance": kmf / 111.12}}).All(&result.Data)
+	//err = r.Coll.Find(bson.M{"geolocation.coordinates": bson.M{"$near": bson.M{"$geometry": {"type":"Point", "coordinates": []float64{latf, lngf}}},"$maxDistance": kmf * 100000}}).All(&result.Data)
+	err = r.Coll.Find(bson.M{"geolocation.coordinates": bson.M{"$near": bson.M{"$geometry": bson.M{"type":"Point", "coordinates": []float64{latf, lngf}},"$maxDistance": kmf * 1000}}}).All(&result.Data)
 	if err != nil {
 		return result, err
 	}

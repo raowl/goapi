@@ -5,8 +5,8 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/context"
 	"github.com/julienschmidt/httprouter"
-	"goapi/config"
-	"goapi/repos"
+	"github.com/raowl/goapi/config"
+	"github.com/raowl/goapi/repos"
 	"gopkg.in/mgo.v2/bson"
 	"io/ioutil"
 	"net/http"
@@ -21,17 +21,42 @@ import (
 
 //POST: /api/v1/auth/ handler
 func (c *AppContext) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
-	body := context.Get(r, "body").(*repos.UserResource)
-	repo := repos.UserRepo{c.Db.C("users")}
-	err := repo.Create(&body.Data)
-	if err != nil {
-		panic(err)
+	var err error
+	var userregistered bool
+	type Validationerror struct {
+		Error_msg string `bson:"error_msg,omitempty" json:"error_msg,omitempty"`
+		Error_code string `bson:"error_code,omitempty" json:"error_code,omitempty"`
+	}
+	type ValidationerrorResource struct {
+		Data Validationerror `json:"data"`
 	}
 
-	w.Header().Set("Content-Type", "application/vnd.api+json")
-	w.WriteHeader(201)
-	json.NewEncoder(w).Encode(body)
+	body := context.Get(r, "body").(*repos.UserResource)
+	repo := repos.UserRepo{c.Db.C("users")}
+	userregistered, err = repo.UserAlreadyExists(body.Data.Username)
+	if err != nil {
+		panic("err")
+	}
+	if userregistered {
+		
+	     fmt.Println("el usuario ya existe");
+             /* panic("error") */
+	     w.Header().Set("Content-Type", "application/vnd.api+json")
+	     w.WriteHeader(400)
+	     // e := ValidationerrorResource{Validationerror{"duplicate username", "125"}}
+	     e := Validationerror{"duplicate username", "125"}
+	     json.NewEncoder(w).Encode(e)
+	} else {
+	     	fmt.Println("el usuario no existe");
+		err = repo.Create(&body.Data)
+		if err != nil {
+			panic(err)
+		}
 
+		w.Header().Set("Content-Type", "application/vnd.api+json")
+		w.WriteHeader(201)
+		json.NewEncoder(w).Encode(body)
+	}
 }
 
 func (c *AppContext) UserHandler(w http.ResponseWriter, r *http.Request) {
@@ -40,6 +65,10 @@ func (c *AppContext) UserHandler(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	var user repos.UserResource
+
+	//fmt.Printf("userId")
+	userId := context.Get(r, "userid").(string)
+	
 
 	if params.ByName("id") != "undefined" {
 		fmt.Println("entro por aca")
@@ -57,12 +86,23 @@ func (c *AppContext) UserHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
+	following, err := repo.GetFByIds(user.Data.Following)
+	user.Data.FollowInfo = following
+	fmt.Printf("Currently following00000000000000000000000000000000000000000000000000000000000000000000000000...\n")
+	fmt.Printf("%+v\n", following)
+	followed, err := repo.GetFollowers(bson.ObjectIdHex(userId))
+	user.Data.FollowedInfo = followed
+	fmt.Printf("USER===00000000000000000000000000000000000000000000000000000000000000000000000000...\n")
+	fmt.Printf("%+v\n", user)
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 	json.NewEncoder(w).Encode(user)
 }
 
 func (c *AppContext) UserWithSkillsHandler(w http.ResponseWriter, r *http.Request) {
 	params := context.Get(r, "params").(httprouter.Params)
+	lang := r.FormValue("lang")
+	print("language")
+	print(lang)
 	userRepo := repos.UserRepo{c.Db.C("users")}
 	categorySkillsRepo := repos.SkillCategoryRepo{c.Db.C("skill_category")}
 	skillRepo := repos.SkillRepo{c.Db.C("skill")}
@@ -72,7 +112,7 @@ func (c *AppContext) UserWithSkillsHandler(w http.ResponseWriter, r *http.Reques
 	fmt.Println("***********************************************************")
 	fmt.Printf("%+v\n", user.Data.Skills)
 	fmt.Println("***********************************************************")
-	skills, err := skillRepo.GetByIds(user.Data.Skills)
+	skills, err := skillRepo.GetByIds(user.Data.Skills, lang)
 	following, err := userRepo.GetByIds(user.Data.Following)
 
 	fmt.Printf("Currently following...\n")
@@ -95,7 +135,9 @@ func (c *AppContext) UserWithSkillsHandler(w http.ResponseWriter, r *http.Reques
 	//other way is an $in in every category also in this loop, but gettting by id prob be quicker, check...
 	CatSkillInfo := make([]SkillCompleteLocal, len(skills.Data))
 	for i := range skills.Data {
-		category, err := categorySkillsRepo.GetById(skills.Data[i].Category)
+		category, err := categorySkillsRepo.GetById(skills.Data[i].Category, lang)
+		print("category......")
+		fmt.Printf("%+v\n", skills)
 		if err != nil {
 			print(err)
 		}
@@ -155,6 +197,9 @@ func (c *AppContext) AuthUserHandler(w http.ResponseWriter, r *http.Request) {
 		"token":     tokenString,
 		"id":        user_resource.Data.Id,
 		"skills":    user_resource.Data.Skills,
+		"facebookid": user_resource.Data.FacebookId,
+		"firstname": user_resource.Data.FirstName,
+		"lastname": user_resource.Data.LastName,
 		"following": user_resource.Data.Following,
 	}
 

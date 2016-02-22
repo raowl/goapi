@@ -3,14 +3,14 @@ package main
 import (
 	"github.com/gorilla/context"
 	"github.com/justinas/alice"
-	"goapi/handlers" //controllers
-	"goapi/repos"    //models
+	"github.com/raowl/goapi/handlers" //controllers
+	"github.com/raowl/goapi/repos"    //models
 	"gopkg.in/mgo.v2"
 	"net/http"
 )
 
 func main() {
-	session, err := mgo.Dial("localhost")
+	session, err := mgo.Dial("127.0.0.1")
 	if err != nil {
 		panic(err)
 	}
@@ -24,7 +24,7 @@ func main() {
 	router.Get("/markers/:id/users", commonMiddleware.ThenFunc(appC.MarkerWithUsersHandler))
 	router.Put("/markers/:id", commonMiddleware.Append(handlers.ContentTypeHandler, handlers.AuthHandler, handlers.BodyHandler(repos.MarkerResource{})).ThenFunc(appC.UpdateMarkerHandler))
 	router.Delete("/markers/:id", commonMiddleware.ThenFunc(appC.DeleteMarkerHandler))
-	router.Get("/markers", commonMiddleware.ThenFunc(appC.MarkersHandler))
+	router.Get("/markersnear/:lat/:lng/:km", commonMiddleware.ThenFunc(appC.MarkersHandler))
 	router.Post("/markers", commonMiddleware.Append(handlers.AuthHandler, handlers.ContentTypeHandler, handlers.BodyHandler(repos.MarkerResource{})).ThenFunc(appC.CreateMarkerHandler))
 	router.Get("/skills", commonMiddleware.ThenFunc(appC.SkillsHandler))
 	router.Post("/api/v1/user/auth", commonMiddleware.Append(handlers.ContentTypeHandler, handlers.BodyHandler(repos.UserResource{})).ThenFunc(appC.AuthUserHandler))
